@@ -4,9 +4,11 @@
 #include "include/server.h"
 
 void HandlerIndex(int fd) {
-  int size = 32;
-  char buf[32] = "Index Handler";
-  send(fd, buf, size, 0);
+  int size_top = 150;
+  char buf_top[150] = "HTTP/1.1 200 OK\r\nContent-Length-Type: text/plain; "
+                      "charset=utf-8\r\nContent-Length: 13\r\nConnection: "
+                      "close\r\n\r\nIndex Handler";
+  send(fd, buf_top, size_top, 0);
 }
 
 int main() {

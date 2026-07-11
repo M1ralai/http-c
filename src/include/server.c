@@ -46,16 +46,17 @@ static void hcb_server_call_handler(hcb_server_t *srv, int fd, char *endpoint) {
 
 // just fucking basic parser for just getting endpoint for now
 static void hcb_server_parser(hcb_server_t *srv, int ret_fd) {
-  int size = 32;
-  char buffer[32];
+  int size = 4096;
+  char buffer[4096];
   recv(ret_fd, buffer, size, 0);
   char parted[3][16];
   for (int i = 0, j = 0, k = 0; i < 32; i++, k++) {
     if (buffer[i] == ' ') {
       j += 1;
       k = 0;
+    } else {
+      parted[j][k] = buffer[i];
     }
-    parted[j][k] = buffer[i];
   }
   hcb_server_call_handler(srv, ret_fd, parted[1]);
   printf("0: %s \n 1: %s \n 2: %s", parted[0], parted[1], parted[2]);
