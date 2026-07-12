@@ -35,9 +35,11 @@ void hcb_server_add_handler(hcb_server_t *srv, char *endpoint, void *func) {
   srv->handlerIndex += 1;
 }
 
-static void hcb_server_call_handler(hcb_server_t *srv, int fd, char *endpoint) {
+static void hcb_server_call_handler(hcb_server_t *srv, int fd,
+                                    hcb_request_t *req) {
   for (int i = 0; i < HANDLER_CAP; i++) {
-    if (hcb_handler_endpoint_check(srv->handlers[i], endpoint)) {
+    if (hcb_handler_endpoint_check(srv->handlers[i],
+                                   hcb_request_get_endpoint(req))) {
       hcb_handler_exec(srv->handlers[i], fd);
       break;
     }
@@ -46,20 +48,9 @@ static void hcb_server_call_handler(hcb_server_t *srv, int fd, char *endpoint) {
 
 // just fucking basic parser for just getting endpoint for now
 static void hcb_server_parser(hcb_server_t *srv, int ret_fd) {
-  int size = 4096;
-  char buffer[4096];
-  recv(ret_fd, buffer, size, 0);
-  char parted[3][16];
-  for (int i = 0, j = 0, k = 0; i < 32; i++, k++) {
-    if (buffer[i] == ' ') {
-      j += 1;
-      k = 0;
-    } else {
-      parted[j][k] = buffer[i];
-    }
-  }
-  hcb_server_call_handler(srv, ret_fd, parted[1]);
-  printf("0: %s \n 1: %s \n 2: %s", parted[0], parted[1], parted[2]);
+  hcb_request_t *req = new_hcb_request(ret_fd);
+  hcb_server_call_handler(srv, ret_fd, req);
+  free_hcb_request(req);
   close(ret_fd);
 }
 

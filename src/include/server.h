@@ -4,6 +4,8 @@
 
 #include <stdlib.h>
 
+#include "request.h"
+
 typedef struct hcb_server hcb_server_t;
 
 hcb_server_t *new_hcb_server(char *port);
