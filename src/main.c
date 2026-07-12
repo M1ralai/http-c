@@ -6,8 +6,6 @@
 #include "include/response.h"
 #include "include/server.h"
 
-// TODO change handlers as hcb_response_t *func(hcb_request_t *req,
-// hcb_response_t *res);
 void index_handler(hcb_request_t *req, hcb_response_t *resp) {
   hcb_response_set_header(resp, "Content-Type", "text/html");
   hcb_body_set(resp, "Hello Index Handler!!!");
