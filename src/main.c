@@ -1,22 +1,21 @@
 #include <stdio.h>
+#include <string.h>
 #include <sys/socket.h>
 
 #include "include/server.h"
 
 void index_handler(int fd) {
-  int size = 150;
-  char buf[150] = "HTTP/1.1 200 OK\r\nContent-Length-Type: text/plain; "
-                  "charset=utf-8\r\nContent-Length: 13\r\nConnection: "
-                  "close\r\n\r\nIndex Handler";
-  send(fd, buf, size, 0);
+  char *buf = "HTTP/1.1 200 OK\r\nContent-Length-Type: text/plain; "
+              "charset=utf-8\r\nContent-Length: 13\r\nConnection: "
+              "close\r\n\r\nIndex Handler";
+  send(fd, buf, strlen(buf), 0);
 }
 
 void health_handler(int fd) {
-  int size = 150;
-  char buf[150] = "HTTP/1.1 200 OK\r\nContent-Length-Type: text/plain; "
-                  "charset=utf-8\r\nContent-Length: 21\r\nConnection: "
-                  "close\r\n\r\nEverything is healthy";
-  send(fd, buf, size, 0);
+  char *buf = "HTTP/1.1 200 OK\r\nContent-Length-Type: text/plain; "
+              "charset=utf-8\r\nContent-Length: 21\r\nConnection: "
+              "close\r\n\r\nEverything is healthy";
+  send(fd, buf, strlen(buf), 0);
 }
 
 int main() {

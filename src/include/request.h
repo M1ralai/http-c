@@ -11,8 +11,11 @@
 #define HEADER_VALUE_SIZE 256
 
 #define MAX_ROWS 100
+#define MAX_HEADERS 32
 
 typedef struct hcb_request hcb_request_t;
+
+typedef struct hcb_request_header hcb_request_header_t;
 
 char *hcb_request_get_endpoint(hcb_request_t *req);
 

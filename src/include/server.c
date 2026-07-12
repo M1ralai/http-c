@@ -35,6 +35,13 @@ void hcb_server_add_handler(hcb_server_t *srv, char *endpoint, void *func) {
   srv->handlerIndex += 1;
 }
 
+static void hcb_default_404(int fd) {
+  char *buf = "HTTP/1.1 404 Not Found\r\n"
+              "Content-Length: 0\r\n"
+              "Connection: close\r\n\r\n";
+  send(fd, buf, strlen(buf), 0);
+}
+
 static void hcb_server_call_handler(hcb_server_t *srv, int fd,
                                     hcb_request_t *req) {
   for (int i = 0; i < HANDLER_CAP; i++) {
@@ -44,6 +51,7 @@ static void hcb_server_call_handler(hcb_server_t *srv, int fd,
       break;
     }
   }
+  hcb_default_404(fd);
 }
 
 // just fucking basic parser for just getting endpoint for now

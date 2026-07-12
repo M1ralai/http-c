@@ -5,22 +5,113 @@ struct hcb_request {
   char *version;
   char *endpoint;
   char *raw_buffer;
+  hcb_request_header_t *headers[MAX_HEADERS];
 };
 
 struct hcb_request_header {
-  char key[HEADER_KEY_SIZE];
-  char value[HEADER_VALUE_SIZE];
+  char *key;
+  char *value;
 };
 
+static hcb_request_header_t *new_hcb_request_header(char *row) {
+  hcb_request_header_t *ret = malloc(sizeof(*ret));
+  ret->key = row;
+  ret->value = NULL;
+  for (int i = 0; row[i] != '\0'; i++) {
+    if (row[i] == ':') {
+      row[i] = '\0';
+
+      int j = i + 1;
+      while (row[j] == ' ') {
+        j++;
+      }
+      ret->value = &row[j];
+      while (row[j] != '\0') {
+        if (row[j] == '\r' || row[j] == '\n') {
+          row[j] = '\0';
+          break;
+        }
+        j++;
+      }
+      break;
+    }
+  }
+  return ret;
+}
+
+static void hcb_request_filler(hcb_request_t *req, char *first) {
+  req->method = first;
+  int j = 1;
+
+  for (int i = 0; first[i] != '\0'; i++) {
+    if (first[i] == ' ') {
+      first[i] = '\0';
+      if (j == 1) {
+        req->endpoint = &first[i + 1];
+        j++;
+      } else if (j == 2) {
+        req->version = &first[i + 1];
+        j++;
+        break;
+      }
+    }
+  }
+}
+
+static void hcb_request_debug_print(hcb_request_t *req) {
+  if (req == NULL) {
+    printf("--- [HTTP Request: NULL] ---\n");
+    return;
+  }
+
+  printf("\n========== [ HTTP REQUEST PARSED ] ==========\n");
+
+  // 1. Request Line (Metod, Yol, Versiyon)
+  printf("[Request Line]\n");
+  // Not: Bu değişken isimlerini kendi hcb_request_t struct'ına göre ayarla
+  printf("  Method  : %s\n", req->method ? req->method : "NULL");
+  printf("  Path    : %s\n", req->endpoint ? req->endpoint : "NULL");
+  printf("  Version : %s\n", req->version ? req->version : "NULL");
+  printf("---------------------------------------------\n");
+
+  // 2. Headers
+  printf("[Headers]\n");
+  int i = 0;
+
+  // MAX_ROWS'a kadar veya NULL görene kadar ilerle
+  while (i < MAX_ROWS && req->headers[i] != NULL) {
+    hcb_request_header_t *hdr = req->headers[i];
+
+    // Key veya Value NULL ise belirt, değilse değerini bas
+    printf("  [%02d] %-20s : %s\n", i, hdr->key ? hdr->key : "NULL",
+           hdr->value ? hdr->value : "NULL");
+    i++;
+  }
+
+  if (i == 0) {
+    printf("  (No headers found)\n");
+  }
+
+  printf("=============================================\n\n");
+}
+
+static void hcb_request_header_filler(hcb_request_t *req, char **rows,
+                                      int row_count) {
+  for (int i = 1; i < row_count; i++) {
+    req->headers[i - 1] = new_hcb_request_header(rows[i]);
+  }
+}
 static void hcb_request_extract_rows(hcb_request_t *req, int buffer_len) {
   char *rows[MAX_ROWS];
   int row_count = 0;
-
   rows[row_count++] = req->raw_buffer;
-
   for (int i = 0; i < buffer_len - 1; i++) {
     if (req->raw_buffer[i] == '\r' && req->raw_buffer[i + 1] == '\n') {
       req->raw_buffer[i] = '\0';
+      if (i > 0 && req->raw_buffer[i - 1] == '\0') {
+        break;
+      }
+
       if (row_count < MAX_ROWS) {
         rows[row_count++] = &req->raw_buffer[i + 2];
       }
@@ -28,22 +119,9 @@ static void hcb_request_extract_rows(hcb_request_t *req, int buffer_len) {
     }
   }
 
-  req->method = rows[0];
-  int j = 1;
-
-  for (int i = 0; rows[0][i] != '\0'; i++) {
-    if (rows[0][i] == ' ') {
-      rows[0][i] = '\0';
-      if (j == 1) {
-        req->endpoint = &rows[0][i + 1];
-        j++;
-      } else if (j == 2) {
-        req->version = &rows[0][i + 1];
-        j++;
-        break;
-      }
-    }
-  }
+  hcb_request_filler(req, rows[0]);
+  hcb_request_header_filler(req, rows, row_count);
+  hcb_request_debug_print(req);
 }
 char *hcb_request_get_endpoint(hcb_request_t *req) { return req->endpoint; }
 
