@@ -11,6 +11,7 @@ hcb_ihandler_t *new_hcb_ihandler() {
   ret = malloc(sizeof *ret);
   ret->handle_func = NULL;
   ret->endpoint = "";
+  ret->method = "";
   return ret;
 }
 

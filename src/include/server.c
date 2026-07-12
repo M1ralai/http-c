@@ -51,7 +51,7 @@ static void hcb_server_call_handler(hcb_server_t *srv, int fd,
       if (!hcb_handler_method_check(srv->handlers[i],
                                     hcb_request_get_method(req))) {
         hcb_handler_exec(srv->handlers[i], fd, req);
-        break;
+        return;
       }
     }
   }
