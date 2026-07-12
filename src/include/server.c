@@ -38,8 +38,8 @@ void hcb_server_add_handler(hcb_server_t *srv, char *endpoint, void *func) {
 static void hcb_server_call_handler(hcb_server_t *srv, int fd,
                                     hcb_request_t *req) {
   for (int i = 0; i < HANDLER_CAP; i++) {
-    if (hcb_handler_endpoint_check(srv->handlers[i],
-                                   hcb_request_get_endpoint(req))) {
+    if (!hcb_handler_endpoint_check(srv->handlers[i],
+                                    hcb_request_get_endpoint(req))) {
       hcb_handler_exec(srv->handlers[i], fd);
       break;
     }

@@ -23,10 +23,7 @@ void hcb_handler_exec(hcb_ihandler_t *handler, int fd) {
 }
 
 int hcb_handler_endpoint_check(hcb_ihandler_t *handler, char *endpoint) {
-  if (strncmp(handler->endpoint, endpoint, 16)) {
-    return 1;
-  }
-  return 0;
+  return strncmp(handler->endpoint, endpoint, 64);
 }
 
 hcb_ihandler_t *free_hcb_ihandler(hcb_ihandler_t *handler) {

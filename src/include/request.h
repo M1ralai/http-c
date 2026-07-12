@@ -7,9 +7,10 @@
 
 #define BUFFER 4096
 
-#define METHOD_SIZE 16
-#define ENDPOINT_SIZE 256
-#define VERSION_SIZE 16
+#define HEADER_KEY_SIZE 64
+#define HEADER_VALUE_SIZE 256
+
+#define MAX_ROWS 100
 
 typedef struct hcb_request hcb_request_t;
 

@@ -1,6 +1,6 @@
-CC := clang
+CC := gcc
 
-CFLAGS := --std=c17 -I./src/include
+CFLAGS := -fsanitize=address -Wall -Wextra --std=c17 -I./src/include
 
 SRC := $(shell find src -name "*.c")
 OBJ := $(patsubst src/%.c,obj/%.o,$(SRC))
@@ -11,7 +11,7 @@ all: $(TARGET)
 
 $(TARGET): $(OBJ)
 	@mkdir -p bin
-	$(CC) $(OBJ) -o $(TARGET)
+	$(CC) -fsanitize=address $(OBJ) -o $(TARGET)
 
 obj/%.o: src/%.c
 	@mkdir -p $(dir $@)
