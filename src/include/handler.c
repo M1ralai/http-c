@@ -2,7 +2,7 @@
 
 struct hcb_ihandler {
   char *endpoint;
-  int (*handle_func)(int fd);
+  int (*handle_func)(hcb_request_t *req, hcb_response_t *resp);
 };
 
 hcb_ihandler_t *new_hcb_ihandler() {
@@ -18,8 +18,17 @@ void hcb_init_ihandler(hcb_ihandler_t *handler, char *endpoint, void *func) {
   handler->endpoint = endpoint;
 }
 
-void hcb_handler_exec(hcb_ihandler_t *handler, int fd) {
-  handler->handle_func(fd);
+static void hcb_send_response(hcb_response_t *resp, int fd) {
+  char *ret = hcb_response_return(resp);
+  send(fd, ret, strlen(ret), 0);
+  free(ret);
+}
+
+void hcb_handler_exec(hcb_ihandler_t *handler, int fd, hcb_request_t *req) {
+  hcb_response_t *resp = new_hcb_response();
+  handler->handle_func(req, resp);
+  hcb_send_response(resp, fd);
+  free_hcb_response(resp);
 }
 
 int hcb_handler_endpoint_check(hcb_ihandler_t *handler, char *endpoint) {

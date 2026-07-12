@@ -2,20 +2,20 @@
 #include <string.h>
 #include <sys/socket.h>
 
+#include "include/request.h"
+#include "include/response.h"
 #include "include/server.h"
 
-void index_handler(int fd) {
-  char *buf = "HTTP/1.1 200 OK\r\nContent-Length-Type: text/plain; "
-              "charset=utf-8\r\nContent-Length: 13\r\nConnection: "
-              "close\r\n\r\nIndex Handler";
-  send(fd, buf, strlen(buf), 0);
+// TODO change handlers as hcb_response_t *func(hcb_request_t *req,
+// hcb_response_t *res);
+void index_handler(hcb_request_t *req, hcb_response_t *resp) {
+  hcb_response_set_header(resp, "Content-Type", "text/html");
+  hcb_body_set(resp, "Hello Index Handler!!!");
 }
 
-void health_handler(int fd) {
-  char *buf = "HTTP/1.1 200 OK\r\nContent-Length-Type: text/plain; "
-              "charset=utf-8\r\nContent-Length: 21\r\nConnection: "
-              "close\r\n\r\nEverything is healthy";
-  send(fd, buf, strlen(buf), 0);
+void health_handler(hcb_request_t *req, hcb_response_t *resp) {
+  hcb_response_set_header(resp, "Content-Type", "text/html");
+  hcb_body_set(resp, "Hello Index Handler!!!");
 }
 
 int main() {

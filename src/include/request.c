@@ -5,7 +5,7 @@ struct hcb_request {
   char *version;
   char *endpoint;
   char *raw_buffer;
-  hcb_request_header_t *headers[MAX_HEADERS];
+  hcb_request_header_t *headers[MAX_REQUEST_HEADERS];
 };
 
 struct hcb_request_header {
@@ -56,43 +56,6 @@ static void hcb_request_filler(hcb_request_t *req, char *first) {
       }
     }
   }
-}
-
-static void hcb_request_debug_print(hcb_request_t *req) {
-  if (req == NULL) {
-    printf("--- [HTTP Request: NULL] ---\n");
-    return;
-  }
-
-  printf("\n========== [ HTTP REQUEST PARSED ] ==========\n");
-
-  // 1. Request Line (Metod, Yol, Versiyon)
-  printf("[Request Line]\n");
-  // Not: Bu değişken isimlerini kendi hcb_request_t struct'ına göre ayarla
-  printf("  Method  : %s\n", req->method ? req->method : "NULL");
-  printf("  Path    : %s\n", req->endpoint ? req->endpoint : "NULL");
-  printf("  Version : %s\n", req->version ? req->version : "NULL");
-  printf("---------------------------------------------\n");
-
-  // 2. Headers
-  printf("[Headers]\n");
-  int i = 0;
-
-  // MAX_ROWS'a kadar veya NULL görene kadar ilerle
-  while (i < MAX_ROWS && req->headers[i] != NULL) {
-    hcb_request_header_t *hdr = req->headers[i];
-
-    // Key veya Value NULL ise belirt, değilse değerini bas
-    printf("  [%02d] %-20s : %s\n", i, hdr->key ? hdr->key : "NULL",
-           hdr->value ? hdr->value : "NULL");
-    i++;
-  }
-
-  if (i == 0) {
-    printf("  (No headers found)\n");
-  }
-
-  printf("=============================================\n\n");
 }
 
 static void hcb_request_header_filler(hcb_request_t *req, char **rows,
