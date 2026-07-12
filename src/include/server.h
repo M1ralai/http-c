@@ -4,7 +4,7 @@
 
 #include <stdlib.h>
 
-#include "request.h"
+#include "http/request.h"
 
 typedef struct hcb_server hcb_server_t;
 

@@ -2,8 +2,8 @@
 #include <string.h>
 #include <sys/socket.h>
 
-#include "include/request.h"
-#include "include/response.h"
+#include "include/http/request.h"
+#include "include/http/response.h"
 #include "include/server.h"
 
 void index_handler(hcb_request_t *req, hcb_response_t *resp) {

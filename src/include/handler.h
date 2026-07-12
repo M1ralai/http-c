@@ -5,8 +5,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "request.h"
-#include "response.h"
+#include "http/request.h"
+#include "http/response.h"
 
 typedef struct hcb_ihandler hcb_ihandler_t;
 hcb_ihandler_t *new_hcb_ihandler();
