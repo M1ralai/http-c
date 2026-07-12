@@ -30,8 +30,9 @@ hcb_server_t *new_hcb_server(char *port) {
   return ret;
 }
 
-void hcb_server_add_handler(hcb_server_t *srv, char *endpoint, void *func) {
-  hcb_init_ihandler(srv->handlers[srv->handlerIndex], endpoint, func);
+void hcb_server_add_handler(hcb_server_t *srv, char *method, char *endpoint,
+                            void *func) {
+  hcb_init_ihandler(srv->handlers[srv->handlerIndex], method, endpoint, func);
   srv->handlerIndex += 1;
 }
 
@@ -47,8 +48,11 @@ static void hcb_server_call_handler(hcb_server_t *srv, int fd,
   for (int i = 0; i < HANDLER_CAP; i++) {
     if (!hcb_handler_endpoint_check(srv->handlers[i],
                                     hcb_request_get_endpoint(req))) {
-      hcb_handler_exec(srv->handlers[i], fd, req);
-      break;
+      if (!hcb_handler_method_check(srv->handlers[i],
+                                    hcb_request_get_method(req))) {
+        hcb_handler_exec(srv->handlers[i], fd, req);
+        break;
+      }
     }
   }
   hcb_default_404(fd);

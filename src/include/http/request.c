@@ -85,7 +85,10 @@ static void hcb_request_extract_rows(hcb_request_t *req, int buffer_len) {
   hcb_request_filler(req, rows[0]);
   hcb_request_header_filler(req, rows, row_count);
 }
+
 char *hcb_request_get_endpoint(hcb_request_t *req) { return req->endpoint; }
+
+char *hcb_request_get_method(hcb_request_t *req) { return req->method; }
 
 hcb_request_t *new_hcb_request(int fd) {
   hcb_request_t *ret;

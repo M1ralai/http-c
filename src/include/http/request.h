@@ -19,6 +19,8 @@ typedef struct hcb_request_header hcb_request_header_t;
 
 char *hcb_request_get_endpoint(hcb_request_t *req);
 
+char *hcb_request_get_method(hcb_request_t *req);
+
 hcb_request_t *new_hcb_request(int fd);
 
 hcb_request_t *free_hcb_request(hcb_request_t *req);
