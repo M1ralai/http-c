@@ -28,8 +28,10 @@ static void hcb_send_response(hcb_response_t *resp, int fd) {
   free(ret);
 }
 
-void hcb_handler_exec(hcb_ihandler_t *handler, int fd, hcb_request_t *req) {
+void hcb_handler_exec(hcb_ihandler_t *handler, hcb_middleware_t *middleware,
+                      int fd, hcb_request_t *req) {
   hcb_response_t *resp = new_hcb_response();
+  hcb_middleware_exec(middleware, req, resp);
   handler->handle_func(req, resp);
   hcb_send_response(resp, fd);
   free_hcb_response(resp);

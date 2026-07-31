@@ -7,6 +7,7 @@
 
 #include "http/request.h"
 #include "http/response.h"
+#include "middleware.h"
 
 typedef struct hcb_ihandler hcb_ihandler_t;
 hcb_ihandler_t *new_hcb_ihandler();
@@ -18,7 +19,8 @@ int hcb_handler_endpoint_check(hcb_ihandler_t *handler, char *endpoint);
 
 int hcb_handler_method_check(hcb_ihandler_t *handler, char *method);
 
-void hcb_handler_exec(hcb_ihandler_t *handler, int fd, hcb_request_t *req);
+void hcb_handler_exec(hcb_ihandler_t *handler, hcb_middleware_t *middleware,
+                      int fd, hcb_request_t *req);
 
 hcb_ihandler_t *free_hcb_ihandler(hcb_ihandler_t *handler);
 

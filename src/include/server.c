@@ -1,5 +1,6 @@
 #include "server.h"
 #include "handler.h"
+#include "middleware.h"
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -15,9 +16,12 @@
 
 struct hcb_server {
   hcb_ihandler_t *handlers[HANDLER_CAP];
+  hcb_middleware_t *middleware;
   char *port;
   int handlerIndex;
 };
+
+void null_func(hcb_request_t *req, hcb_response_t *resp);
 
 hcb_server_t *new_hcb_server(char *port) {
   hcb_server_t *ret;
@@ -26,6 +30,7 @@ hcb_server_t *new_hcb_server(char *port) {
   for (int i = 0; i < HANDLER_CAP; i++) {
     ret->handlers[i] = new_hcb_ihandler();
   }
+  ret->middleware = hcb_new_middleware(null_func);
   ret->port = port;
   return ret;
 }
@@ -50,7 +55,7 @@ static void hcb_server_call_handler(hcb_server_t *srv, int fd,
                                     hcb_request_get_endpoint(req))) {
       if (!hcb_handler_method_check(srv->handlers[i],
                                     hcb_request_get_method(req))) {
-        hcb_handler_exec(srv->handlers[i], fd, req);
+        hcb_handler_exec(srv->handlers[i], srv->middleware, fd, req);
         return;
       }
     }
@@ -106,6 +111,12 @@ void hcb_server_start(hcb_server_t *srv) {
       return;
     }
   }
+}
+
+void hcb_server_register_middleware(hcb_server_t *server,
+                                    void (*func)(hcb_request_t *req,
+                                                 hcb_response_t *resp)) {
+  hcb_middleware_register(server->middleware, func);
 }
 
 hcb_server_t *free_hcb_server(hcb_server_t *srv) {
