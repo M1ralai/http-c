@@ -23,10 +23,10 @@ static void hcb_middleware_set(hcb_middleware_t *middleware,
 
 void hcb_middleware_exec(hcb_middleware_t *middleware, hcb_request_t *req,
                          hcb_response_t *resp) {
-  for (hcb_middleware_t *curr = middleware; curr->next != NULL;
-       curr = curr->next) {
-    curr->func(req, resp);
-    ;
+  for (hcb_middleware_t *curr = middleware; curr != NULL; curr = curr->next) {
+    if (curr->func) {
+      curr->func(req, resp);
+    };
   }
 }
 

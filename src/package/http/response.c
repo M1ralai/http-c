@@ -1,4 +1,4 @@
-#include "response.h"
+#include "http/response.h"
 
 struct hcb_response {
   char *version; // HTTP/1.1 as default for now
@@ -41,6 +41,29 @@ void hcb_response_set_header(hcb_response_t *resp, char *key, char *value) {
 }
 
 void hcb_body_set(hcb_response_t *resp, char *body) { resp->body = body; }
+
+void hcb_body_append(hcb_response_t *resp, char *body) {
+  if (resp->body == NULL) {
+    resp->body = body;
+    return;
+  }
+  size_t len_body = strlen(resp->body);
+  size_t len_parsing = strlen(body);
+
+  char *new_body = malloc(len_body + len_parsing + 1);
+
+  if (new_body == NULL) {
+    exit(EXIT_FAILURE);
+  }
+
+  memcpy(new_body, resp->body, len_body);
+  memcpy(new_body + len_body, body, len_parsing);
+
+  new_body[len_body + len_parsing] = '\0';
+
+  resp->body = new_body;
+}
+
 char *hcb_response_return(hcb_response_t *resp) {
   char cl_buffer[32];
   int body_len = resp->body ? strlen(resp->body) : 0;

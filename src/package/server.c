@@ -21,7 +21,7 @@ struct hcb_server {
   int handlerIndex;
 };
 
-void null_func(hcb_request_t *req, hcb_response_t *resp);
+void null_func(hcb_request_t *req, hcb_response_t *resp) {};
 
 hcb_server_t *new_hcb_server(char *port) {
   hcb_server_t *ret;
@@ -30,7 +30,9 @@ hcb_server_t *new_hcb_server(char *port) {
   for (int i = 0; i < HANDLER_CAP; i++) {
     ret->handlers[i] = new_hcb_ihandler();
   }
-  ret->middleware = hcb_new_middleware(null_func);
+  printf("Server created beside middleware \n");
+  ret->middleware = new_middleware(null_func);
+  printf("New middleware created for server \n");
   ret->port = port;
   return ret;
 }

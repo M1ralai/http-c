@@ -15,6 +15,8 @@ void hcb_response_set_header(hcb_response_t *resp, char *key, char *value);
 
 void hcb_body_set(hcb_response_t *resp, char *body);
 
+void hcb_body_append(hcb_response_t *resp, char *body);
+
 char *hcb_response_return(hcb_response_t *resp);
 
 hcb_response_t *new_hcb_response();

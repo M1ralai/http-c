@@ -1,0 +1,19 @@
+[
+  {
+    "file": "src/package/server.c",
+    "arguments": [
+      "/usr/bin/gcc",
+      "-fsanitize=address",
+      "-Wall",
+      "-Wextra",
+      "--std=c17",
+      "-I./src/include",
+      "-c",
+      "src/package/server.c",
+      "-o",
+      "obj/package/server.o"
+    ],
+    "directory": "/Users/atahandemirer/Developer/http-c",
+    "output": "obj/package/server.o"
+  }
+]
