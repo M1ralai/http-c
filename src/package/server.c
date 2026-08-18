@@ -1,6 +1,6 @@
 #include "server.h"
-#include "handler.h"
 #include "middleware.h"
+#include "type/hash_map.h"
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -12,24 +12,33 @@
 #include <string.h>
 #include <unistd.h>
 
-#define HANDLER_CAP 32
-
 struct hcb_server {
-  hcb_ihandler_t *handlers[HANDLER_CAP];
+  hcb_hash_map_t *handlers;
   hcb_middleware_t *middleware;
   char *port;
-  int handlerIndex;
 };
 
-void null_func(hcb_request_t *req, hcb_response_t *resp) {};
+void null_func(hcb_request_t *req, hcb_response_t *resp) {
+  (void)req;
+  (void)resp;
+};
+
+static char *hcb_server_route_key(char *method, char *endpoint) {
+  size_t method_len = strlen(method);
+  size_t endpoint_len = strlen(endpoint);
+  char *key = malloc(method_len + endpoint_len + 2);
+
+  if (key == NULL)
+    return NULL;
+
+  snprintf(key, method_len + endpoint_len + 2, "%s %s", method, endpoint);
+  return key;
+}
 
 hcb_server_t *new_hcb_server(char *port) {
   hcb_server_t *ret;
   ret = malloc(sizeof *ret);
-  ret->handlerIndex = 0;
-  for (int i = 0; i < HANDLER_CAP; i++) {
-    ret->handlers[i] = new_hcb_ihandler();
-  }
+  ret->handlers = new_hash_map();
   printf("Server created beside middleware \n");
   ret->middleware = new_middleware(null_func);
   printf("New middleware created for server \n");
@@ -39,8 +48,13 @@ hcb_server_t *new_hcb_server(char *port) {
 
 void hcb_server_add_handler(hcb_server_t *srv, char *method, char *endpoint,
                             void *func) {
-  hcb_init_ihandler(srv->handlers[srv->handlerIndex], method, endpoint, func);
-  srv->handlerIndex += 1;
+  char *key = hcb_server_route_key(method, endpoint);
+
+  if (key == NULL)
+    return;
+
+  hcb_hash_map_add(srv->handlers, key, (data)func);
+  free(key);
 }
 
 static void hcb_default_404(int fd) {
@@ -52,17 +66,30 @@ static void hcb_default_404(int fd) {
 
 static void hcb_server_call_handler(hcb_server_t *srv, int fd,
                                     hcb_request_t *req) {
-  for (int i = 0; i < HANDLER_CAP; i++) {
-    if (!hcb_handler_endpoint_check(srv->handlers[i],
-                                    hcb_request_get_endpoint(req))) {
-      if (!hcb_handler_method_check(srv->handlers[i],
-                                    hcb_request_get_method(req))) {
-        hcb_handler_exec(srv->handlers[i], srv->middleware, fd, req);
-        return;
-      }
-    }
+  char *key = hcb_server_route_key(hcb_request_get_method(req),
+                                   hcb_request_get_endpoint(req));
+
+  if (key == NULL) {
+    hcb_default_404(fd);
+    return;
   }
-  hcb_default_404(fd);
+
+  data handler = hcb_hash_map_get(srv->handlers, key);
+  free(key);
+
+  if (handler == NULL) {
+    hcb_default_404(fd);
+    return;
+  }
+
+  hcb_response_t *resp = new_hcb_response();
+  hcb_middleware_exec(srv->middleware, req, resp);
+  handler(req, resp);
+
+  char *buf = hcb_response_return(resp);
+  send(fd, buf, strlen(buf), 0);
+  free(buf);
+  free_hcb_response(resp);
 }
 
 // just fucking basic parser for just getting endpoint for now
@@ -122,9 +149,7 @@ void hcb_server_register_middleware(hcb_server_t *server,
 }
 
 hcb_server_t *free_hcb_server(hcb_server_t *srv) {
-  for (int i = 0; i < HANDLER_CAP; i++) {
-    srv->handlers[i] = free_hcb_ihandler(srv->handlers[i]);
-  }
+  free_hash_map(srv->handlers);
   free(srv);
   return srv;
 }
