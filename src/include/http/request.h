@@ -21,6 +21,8 @@ char *hcb_request_get_endpoint(hcb_request_t *req);
 
 char *hcb_request_get_method(hcb_request_t *req);
 
+char *hcb_request_get_header(hcb_request_t *req, char *key);
+
 int hcb_request_is_complete(const char *buffer, size_t buffer_len);
 
 hcb_request_t *hcb_request_parse(const char *buffer, size_t buffer_len);

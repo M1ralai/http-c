@@ -107,13 +107,22 @@ char *hcb_request_get_endpoint(hcb_request_t *req) { return req->endpoint; }
 
 char *hcb_request_get_method(hcb_request_t *req) { return req->method; }
 
+char *hcb_request_get_header(hcb_request_t *req, char *key) {
+  for (int i = 0; i < MAX_REQUEST_HEADERS; i++) {
+    if (strcmp(req->headers[i]->key, key)) {
+      return req->headers[i]->value;
+    }
+  }
+  return NULL;
+}
+
 int hcb_request_is_complete(const char *buffer, size_t buffer_len) {
   if (buffer == NULL || buffer_len < 4)
     return 0;
 
   for (size_t i = 0; i + 3 < buffer_len; i++) {
-    if (buffer[i] == '\r' && buffer[i + 1] == '\n' &&
-        buffer[i + 2] == '\r' && buffer[i + 3] == '\n') {
+    if (buffer[i] == '\r' && buffer[i + 1] == '\n' && buffer[i + 2] == '\r' &&
+        buffer[i + 3] == '\n') {
       return 1;
     }
   }
