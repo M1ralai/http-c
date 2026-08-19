@@ -9,10 +9,10 @@
 
 #include <errno.h>
 #include <netdb.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <signal.h>
 #include <unistd.h>
 
 #ifdef __linux__
@@ -335,8 +335,7 @@ static void hcb_server_poll_loop(hcb_server_t *srv, int socket_fd) {
   while (1) {
     size_t max_fds = srv->connection_count + 1;
     struct pollfd *fds = calloc(max_fds, sizeof(*fds));
-    hcb_connection_t **connections =
-        calloc(max_fds, sizeof(*connections));
+    hcb_connection_t **connections = calloc(max_fds, sizeof(*connections));
 
     if (fds == NULL || connections == NULL) {
       free(fds);
@@ -412,7 +411,7 @@ void hcb_server_start(hcb_server_t *srv) {
 
   int socket_fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
   if (socket_fd == -1) {
-    printf("socket error");
+    perror("socket error");
     freeaddrinfo(res);
     return;
   }
