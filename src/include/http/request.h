@@ -1,9 +1,9 @@
 #ifndef HCB_REQUEST
 #define HCB_REQUEST
 
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/socket.h>
 
 #define BUFFER 4096
 
@@ -21,7 +21,9 @@ char *hcb_request_get_endpoint(hcb_request_t *req);
 
 char *hcb_request_get_method(hcb_request_t *req);
 
-hcb_request_t *new_hcb_request(int fd);
+int hcb_request_is_complete(const char *buffer, size_t buffer_len);
+
+hcb_request_t *hcb_request_parse(const char *buffer, size_t buffer_len);
 
 hcb_request_t *free_hcb_request(hcb_request_t *req);
 

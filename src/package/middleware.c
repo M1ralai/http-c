@@ -40,3 +40,15 @@ void hcb_middleware_register(hcb_middleware_t *middleware,
     hcb_middleware_set(middleware, func);
   }
 }
+
+hcb_middleware_t *free_middleware(hcb_middleware_t *middleware) {
+  hcb_middleware_t *curr = middleware;
+
+  while (curr != NULL) {
+    hcb_middleware_t *next = curr->next;
+    free(curr);
+    curr = next;
+  }
+
+  return middleware;
+}

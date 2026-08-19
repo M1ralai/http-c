@@ -13,6 +13,8 @@ typedef struct hcb_response_header hcb_response_header_t;
 
 void hcb_response_set_header(hcb_response_t *resp, char *key, char *value);
 
+void hcb_response_set_status(hcb_response_t *resp, char *status);
+
 void hcb_body_set(hcb_response_t *resp, char *body);
 
 void hcb_body_append(hcb_response_t *resp, char *body);

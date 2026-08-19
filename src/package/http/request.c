@@ -1,5 +1,7 @@
 #include "http/request.h"
 
+#include <string.h>
+
 struct hcb_request {
   char *method;
   char *version;
@@ -15,8 +17,12 @@ struct hcb_request_header {
 
 static hcb_request_header_t *new_hcb_request_header(char *row) {
   hcb_request_header_t *ret = malloc(sizeof(*ret));
+  if (ret == NULL)
+    return NULL;
+
   ret->key = row;
-  ret->value = NULL;
+  ret->value = "";
+
   for (int i = 0; row[i] != '\0'; i++) {
     if (row[i] == ':') {
       row[i] = '\0';
@@ -64,23 +70,34 @@ static void hcb_request_header_filler(hcb_request_t *req, char **rows,
     req->headers[i - 1] = new_hcb_request_header(rows[i]);
   }
 }
-static void hcb_request_extract_rows(hcb_request_t *req, int buffer_len) {
+
+static void hcb_request_extract_rows(hcb_request_t *req, size_t buffer_len) {
   char *rows[MAX_ROWS];
   int row_count = 0;
-  rows[row_count++] = req->raw_buffer;
-  for (int i = 0; i < buffer_len - 1; i++) {
-    if (req->raw_buffer[i] == '\r' && req->raw_buffer[i + 1] == '\n') {
-      req->raw_buffer[i] = '\0';
-      if (i > 0 && req->raw_buffer[i - 1] == '\0') {
+
+  char *line = req->raw_buffer;
+  char *end = req->raw_buffer + buffer_len;
+
+  for (char *curr = req->raw_buffer; curr + 1 < end; curr++) {
+    if (curr[0] == '\r' && curr[1] == '\n') {
+      curr[0] = '\0';
+      curr[1] = '\0';
+
+      if (line[0] == '\0') {
         break;
       }
 
       if (row_count < MAX_ROWS) {
-        rows[row_count++] = &req->raw_buffer[i + 2];
+        rows[row_count++] = line;
       }
-      i++;
+
+      line = curr + 2;
+      curr++;
     }
   }
+
+  if (row_count == 0)
+    return;
 
   hcb_request_filler(req, rows[0]);
   hcb_request_header_filler(req, rows, row_count);
@@ -90,24 +107,48 @@ char *hcb_request_get_endpoint(hcb_request_t *req) { return req->endpoint; }
 
 char *hcb_request_get_method(hcb_request_t *req) { return req->method; }
 
-hcb_request_t *new_hcb_request(int fd) {
-  hcb_request_t *ret;
-  ret = calloc(1, sizeof *ret);
-  int size = BUFFER;
-  char *buffer;
-  buffer = malloc(BUFFER);
-  ret->raw_buffer = buffer;
-  int n = recv(fd, ret->raw_buffer, size, 0);
-  if (n > size) {
-    printf("recieving data more than buffer, handle taht later");
-    return ret;
+int hcb_request_is_complete(const char *buffer, size_t buffer_len) {
+  if (buffer == NULL || buffer_len < 4)
+    return 0;
+
+  for (size_t i = 0; i + 3 < buffer_len; i++) {
+    if (buffer[i] == '\r' && buffer[i + 1] == '\n' &&
+        buffer[i + 2] == '\r' && buffer[i + 3] == '\n') {
+      return 1;
+    }
   }
-  ret->raw_buffer[n - 1] = '\0';
-  hcb_request_extract_rows(ret, n);
+
+  return 0;
+}
+
+hcb_request_t *hcb_request_parse(const char *buffer, size_t buffer_len) {
+  if (buffer == NULL || buffer_len == 0)
+    return NULL;
+
+  hcb_request_t *ret = calloc(1, sizeof *ret);
+  if (ret == NULL)
+    return NULL;
+
+  ret->raw_buffer = malloc(buffer_len + 1);
+  if (ret->raw_buffer == NULL) {
+    free(ret);
+    return NULL;
+  }
+
+  memcpy(ret->raw_buffer, buffer, buffer_len);
+  ret->raw_buffer[buffer_len] = '\0';
+  hcb_request_extract_rows(ret, buffer_len);
   return ret;
 }
 
 hcb_request_t *free_hcb_request(hcb_request_t *req) {
+  if (req == NULL)
+    return req;
+
+  for (int i = 0; i < MAX_REQUEST_HEADERS; i++) {
+    free(req->headers[i]);
+  }
+
   free(req->raw_buffer);
 
   free(req);

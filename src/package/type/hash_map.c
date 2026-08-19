@@ -16,6 +16,16 @@ struct hcb_hash_map {
   hcb_bucket_t buckets[BUCKET_COUNT];
 };
 
+static char *hcb_hash_map_strdup(const char *str) {
+  size_t len = strlen(str);
+  char *copy = malloc(len + 1);
+  if (copy == NULL)
+    return NULL;
+
+  memcpy(copy, str, len + 1);
+  return copy;
+}
+
 static unsigned long hcb_hash_string(const char *str) {
   unsigned long hash = 5381;
 
@@ -49,7 +59,7 @@ void hcb_hash_map_add(hcb_hash_map_t *map, const char *str, data func) {
 
     // Boş slot
     if (pair->key == NULL) {
-      pair->key = strdup(str);
+      pair->key = hcb_hash_map_strdup(str);
 
       if (pair->key == NULL)
         return;

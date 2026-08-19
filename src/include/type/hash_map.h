@@ -1,4 +1,6 @@
-#ifndef hcb_hash_map
+#ifndef HCB_HASH_MAP
+
+#define HCB_HASH_MAP
 
 #include "http/request.h"
 #include "http/response.h"
