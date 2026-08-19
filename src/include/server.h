@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 
+#include "handler.h"
 #include "http/request.h"
 #include "http/response.h"
 
@@ -19,11 +20,14 @@ char *hcb_server_handle_request(hcb_server_t *srv, hcb_request_t *req);
 
 void hcb_server_start(hcb_server_t *srv);
 
-void hcb_server_get(hcb_server_t *srv, char *endpoint, void *func);
-void hcb_server_post(hcb_server_t *srv, char *endpoint, void *func);
-void hcb_server_put(hcb_server_t *srv, char *endpoint, void *func);
-void hcb_server_patch(hcb_server_t *srv, char *endpoint, void *func);
-void hcb_server_delete(hcb_server_t *srv, char *endpoint, void *func);
+void hcb_server_get(hcb_server_t *srv, char *endpoint, hcb_handler_func_t func);
+void hcb_server_post(hcb_server_t *srv, char *endpoint,
+                     hcb_handler_func_t func);
+void hcb_server_put(hcb_server_t *srv, char *endpoint, hcb_handler_func_t func);
+void hcb_server_patch(hcb_server_t *srv, char *endpoint,
+                      hcb_handler_func_t func);
+void hcb_server_delete(hcb_server_t *srv, char *endpoint,
+                       hcb_handler_func_t func);
 
 hcb_server_t *free_hcb_server(hcb_server_t *srv);
 

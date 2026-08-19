@@ -4,7 +4,7 @@
 #define BUCKET_COUNT 32
 
 typedef struct hcb_pair {
-  data func;
+  hcb_handler_func_t func;
   char *key;
 } hcb_pair_t;
 
@@ -43,7 +43,8 @@ hcb_hash_map_t *new_hash_map() {
   return ret;
 }
 
-void hcb_hash_map_add(hcb_hash_map_t *map, const char *str, data func) {
+void hcb_hash_map_add(hcb_hash_map_t *map, const char *str,
+                      hcb_handler_func_t func) {
   size_t bucket_index = hcb_hash_string(str) % BUCKET_COUNT;
 
   hcb_bucket_t *bucket = &map->buckets[bucket_index];
@@ -70,7 +71,7 @@ void hcb_hash_map_add(hcb_hash_map_t *map, const char *str, data func) {
   }
 }
 
-data hcb_hash_map_get(hcb_hash_map_t *map, const char *str) {
+hcb_handler_func_t hcb_hash_map_get(hcb_hash_map_t *map, const char *str) {
   size_t bucket_index = hcb_hash_string(str) % BUCKET_COUNT;
 
   hcb_bucket_t *bucket = &map->buckets[bucket_index];

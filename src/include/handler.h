@@ -9,7 +9,10 @@
 #include "middleware.h"
 
 typedef struct hcb_ihandler hcb_ihandler_t;
+
 hcb_ihandler_t *new_hcb_ihandler();
+
+typedef void (*hcb_handler_func_t)(hcb_request_t *req, hcb_response_t *resp);
 
 void hcb_init_ihandler(hcb_ihandler_t *handler, char *method, char *endpoint,
                        void *func);
