@@ -2,7 +2,7 @@
 
 #define HCB_HASH_MAP
 
-#include "handler.h"
+#include "server.h"
 
 typedef struct hcb_hash_map hcb_hash_map_t;
 

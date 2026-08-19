@@ -66,7 +66,7 @@ static void hcb_request_filler(hcb_request_t *req, char *first) {
 
 static void hcb_request_header_filler(hcb_request_t *req, char **rows,
                                       int row_count) {
-  for (int i = 1; i < row_count; i++) {
+  for (int i = 1; i < row_count && i <= MAX_REQUEST_HEADERS; i++) {
     req->headers[i - 1] = new_hcb_request_header(rows[i]);
   }
 }
@@ -108,8 +108,11 @@ char *hcb_request_get_endpoint(hcb_request_t *req) { return req->endpoint; }
 char *hcb_request_get_method(hcb_request_t *req) { return req->method; }
 
 char *hcb_request_get_header(hcb_request_t *req, char *key) {
-  for (int i = 0; i < MAX_REQUEST_HEADERS; i++) {
-    if (strcmp(req->headers[i]->key, key)) {
+  if (req == NULL || key == NULL)
+    return NULL;
+
+  for (int i = 0; i < MAX_REQUEST_HEADERS && req->headers[i] != NULL; i++) {
+    if (!strcmp(req->headers[i]->key, key)) {
       return req->headers[i]->value;
     }
   }

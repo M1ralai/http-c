@@ -4,11 +4,12 @@
 
 #include <stdlib.h>
 
-#include "handler.h"
 #include "http/request.h"
 #include "http/response.h"
 
 typedef struct hcb_server hcb_server_t;
+
+typedef void (*hcb_handler_func_t)(hcb_request_t *req, hcb_response_t *resp);
 
 hcb_server_t *new_hcb_server(char *port);
 
