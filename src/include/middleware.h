@@ -15,4 +15,6 @@ void hcb_middleware_exec(hcb_middleware_t *middleware, hcb_request_t *req,
 void hcb_middleware_register(hcb_middleware_t *middleware,
                              void (*func)(hcb_request_t *req,
                                           hcb_response_t *resp));
+
+hcb_middleware_t *free_middleware(hcb_middleware_t *middleware);
 #endif // !HCB_MIDDLEWARE

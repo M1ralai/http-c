@@ -18,6 +18,8 @@ void hcb_server_register_middleware(hcb_server_t *server,
                                     void (*func)(hcb_request_t *req,
                                                  hcb_response_t *resp));
 
+char *hcb_server_handle_request(hcb_server_t *srv, hcb_request_t *req);
+
 void hcb_server_start(hcb_server_t *srv);
 
 hcb_server_t *free_hcb_server(hcb_server_t *srv);

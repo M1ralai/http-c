@@ -3,7 +3,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "http/request.h"
 #include "http/response.h"
@@ -20,7 +19,7 @@ int hcb_handler_endpoint_check(hcb_ihandler_t *handler, char *endpoint);
 int hcb_handler_method_check(hcb_ihandler_t *handler, char *method);
 
 void hcb_handler_exec(hcb_ihandler_t *handler, hcb_middleware_t *middleware,
-                      int fd, hcb_request_t *req);
+                      hcb_request_t *req, hcb_response_t *resp);
 
 hcb_ihandler_t *free_hcb_ihandler(hcb_ihandler_t *handler);
 

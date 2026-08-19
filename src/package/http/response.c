@@ -15,13 +15,35 @@ struct hcb_response_header {
   char *value;
 };
 
+static char *hcb_response_strdup(const char *str) {
+  size_t len = strlen(str);
+  char *copy = malloc(len + 1);
+  if (copy == NULL)
+    return NULL;
+
+  memcpy(copy, str, len + 1);
+  return copy;
+}
+
 static hcb_response_header_t *new_response_header_t(char *key, char *value) {
   hcb_response_header_t *ret;
   ret = malloc(sizeof *ret);
-  ret->key = key;
-  ret->value = value;
+  if (ret == NULL)
+    return NULL;
+
+  ret->key = hcb_response_strdup(key);
+  ret->value = hcb_response_strdup(value);
+
+  if (ret->key == NULL || ret->value == NULL) {
+    free(ret->key);
+    free(ret->value);
+    free(ret);
+    return NULL;
+  }
+
   return ret;
 }
+
 hcb_response_t *new_hcb_response() {
   hcb_response_t *ret = calloc(1, sizeof(hcb_response_t));
   ret->version = "HTTP/1.1";
@@ -30,23 +52,55 @@ hcb_response_t *new_hcb_response() {
   return ret;
 }
 void hcb_response_set_header(hcb_response_t *resp, char *key, char *value) {
+  if (resp == NULL || key == NULL || value == NULL)
+    return;
+
   for (int i = 0; i < resp->header_len; i++) {
     if (!strcmp(resp->headers[i]->key, key)) {
-      resp->headers[i]->value = value;
+      char *new_value = hcb_response_strdup(value);
+      if (new_value == NULL)
+        return;
+
+      free(resp->headers[i]->value);
+      resp->headers[i]->value = new_value;
       return;
     }
   }
+
+  if (resp->header_len >= MAX_RESPONSE_HEADERS)
+    return;
+
   resp->headers[resp->header_len] = new_response_header_t(key, value);
+  if (resp->headers[resp->header_len] == NULL)
+    return;
+
   resp->header_len++;
 }
 
-void hcb_body_set(hcb_response_t *resp, char *body) { resp->body = body; }
+void hcb_response_set_status(hcb_response_t *resp, char *status) {
+  if (resp == NULL || status == NULL)
+    return;
+
+  resp->status = status;
+}
+
+void hcb_body_set(hcb_response_t *resp, char *body) {
+  if (resp == NULL)
+    return;
+
+  free(resp->body);
+  resp->body = body == NULL ? NULL : hcb_response_strdup(body);
+}
 
 void hcb_body_append(hcb_response_t *resp, char *body) {
+  if (resp == NULL || body == NULL)
+    return;
+
   if (resp->body == NULL) {
-    resp->body = body;
+    resp->body = hcb_response_strdup(body);
     return;
   }
+
   size_t len_body = strlen(resp->body);
   size_t len_parsing = strlen(body);
 
@@ -61,6 +115,7 @@ void hcb_body_append(hcb_response_t *resp, char *body) {
 
   new_body[len_body + len_parsing] = '\0';
 
+  free(resp->body);
   resp->body = new_body;
 }
 
@@ -69,7 +124,7 @@ char *hcb_response_return(hcb_response_t *resp) {
   int body_len = resp->body ? strlen(resp->body) : 0;
   snprintf(cl_buffer, sizeof(cl_buffer), "%d", body_len);
 
-  hcb_response_set_header(resp, "Content-Length", strdup(cl_buffer));
+  hcb_response_set_header(resp, "Content-Length", cl_buffer);
 
   size_t total_size = strlen(resp->version) + 1 + strlen(resp->status) +
                       2; // "HTTP/1.1 200 OK\r\n"
@@ -114,9 +169,16 @@ char *hcb_response_return(hcb_response_t *resp) {
 }
 
 hcb_response_t *free_hcb_response(hcb_response_t *resp) {
+  if (resp == NULL)
+    return resp;
+
   for (int i = 0; i < resp->header_len; i++) {
+    free(resp->headers[i]->key);
+    free(resp->headers[i]->value);
     free(resp->headers[i]);
   }
+
+  free(resp->body);
   free(resp);
   return resp;
 }
