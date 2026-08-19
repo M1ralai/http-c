@@ -71,8 +71,8 @@ hcb_server_t *new_hcb_server(char *port) {
   return ret;
 }
 
-void hcb_server_add_handler(hcb_server_t *srv, char *method, char *endpoint,
-                            void *func) {
+static void hcb_server_add_handler(hcb_server_t *srv, char *method,
+                                   char *endpoint, void *func) {
   char *key = hcb_server_route_key(method, endpoint);
 
   if (key == NULL)
@@ -80,6 +80,42 @@ void hcb_server_add_handler(hcb_server_t *srv, char *method, char *endpoint,
 
   hcb_hash_map_add(srv->handlers, key, (data)func);
   free(key);
+}
+
+void hcb_server_get(hcb_server_t *srv, char *endpoint, void *func) {
+  hcb_server_add_handler(srv, "GET", endpoint, func);
+}
+
+void hcb_server_post(hcb_server_t *srv, char *endpoint, void *func) {
+  hcb_server_add_handler(srv, "POST", endpoint, func);
+}
+
+void hcb_server_patch(hcb_server_t *srv, char *endpoint, void *func) {
+  hcb_server_add_handler(srv, "PATCH", endpoint, func);
+}
+
+void hcb_server_put(hcb_server_t *srv, char *endpoint, void *func) {
+  hcb_server_add_handler(srv, "PUT", endpoint, func);
+}
+
+void hcb_server_delete(hcb_server_t *srv, char *endpoint, void *func) {
+  hcb_server_add_handler(srv, "DELETE", endpoint, func);
+}
+
+void hcb_server_connect(hcb_server_t *srv, char *endpoint, void *func) {
+  hcb_server_add_handler(srv, "CONNECT", endpoint, func);
+}
+
+void hcb_server_options(hcb_server_t *srv, char *endpoint, void *func) {
+  hcb_server_add_handler(srv, "OPTIONS", endpoint, func);
+}
+
+void hcb_server_trace(hcb_server_t *srv, char *endpoint, void *func) {
+  hcb_server_add_handler(srv, "TRACE", endpoint, func);
+}
+
+void hcb_server_head(hcb_server_t *srv, char *endpoint, void *func) {
+  hcb_server_add_handler(srv, "HEAD", endpoint, func);
 }
 
 static char *hcb_server_error_response(char *status) {

@@ -41,10 +41,10 @@ void middleware_one(hcb_request_t *req, hcb_response_t *resp) {
 
 int main() {
   hcb_server_t *srv = new_hcb_server("8080");
-  hcb_server_add_handler(srv, "GET", "/", index_handler);
-  hcb_server_add_handler(srv, "GET", "/health", health_get_handler);
-  hcb_server_add_handler(srv, "POST", "/health", health_post_handler);
-  hcb_server_add_handler(srv, "GET", "/middleware", middleware_handler);
+  hcb_server_get(srv, "/", index_handler);
+  hcb_server_get(srv, "/health", health_get_handler);
+  hcb_server_post(srv, "/health", health_post_handler);
+  hcb_server_get(srv, "/middleware", middleware_handler);
   hcb_server_register_middleware(srv, middleware_one);
   hcb_server_start(srv);
   free_hcb_server(srv);

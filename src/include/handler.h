@@ -1,5 +1,5 @@
-#ifndef HANDLER
-#define HANDLER
+#ifndef HCB_HANDLER
+#define HCB_HANDLER
 
 #include <stdlib.h>
 #include <string.h>

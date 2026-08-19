@@ -121,8 +121,8 @@ void hcb_body_append(hcb_response_t *resp, char *body) {
 
 char *hcb_response_return(hcb_response_t *resp) {
   char cl_buffer[32];
-  int body_len = resp->body ? strlen(resp->body) : 0;
-  snprintf(cl_buffer, sizeof(cl_buffer), "%d", body_len);
+  size_t body_len = resp->body ? strlen(resp->body) : 0;
+  snprintf(cl_buffer, sizeof(cl_buffer), "%zu", body_len);
 
   hcb_response_set_header(resp, "Content-Length", cl_buffer);
 
